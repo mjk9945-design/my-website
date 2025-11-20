@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>하프웨드 결혼준비 견적서</title>
+    <style>
+        /* --- CSS 스타일 --- */
+        :root {
+            --primary-color: #ff7a8a;
+            --bg-color: #f9f9f9;
+            --text-color: #333;
+            --border-color: #ddd;
+        }
+        
+        /* 모든 요소의 너비 계산을 테두리 포함으로 통일 (버튼 길이 맞춤 핵심) */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 0 15px rgba(0,0,0,0.05);
+            min-height: 100vh;
+        }
+
+        h1, h2, h3 {
+            text-align: center;
+            color: #444;
+        }
+
+        h1 { margin-bottom: 30px; border-bottom: 2px solid var(--primary-color); padding-bottom: 15px; }
+
+        /* 셀렉션 영역 */
+        .category-section {
+            margin-bottom: 30px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .category-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .selection-display {
+            background: #f1f1f1;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: bold;
+            color: #555;
+            cursor: pointer;
+        }
+        .selection-display:hover { background: #e1e1e1; }
+
+        .option-select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none; 
+        }
+
+        /* 벤더 리스트 모달/팝업 스타일 */
+        .vendor-list-area {
+            display: none;
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            border-top: 1px solid #eee;
+        }
+        .vendor-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+        .vendor-item:hover { background-color: #fff0f2; }
+
+        /* 입력 및 버튼 */
+        .input-group {
+            margin: 20px 0;
+            text-align: center;
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: 60%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        /* 버튼 스타일 통합 */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin-top: 10px;
+            text-align: center;
+            text-decoration: none; /* 링크 밑줄 제거 */
+        }
+        .btn:disabled { background-color: #ccc; cursor: not-allowed; }
+        
+        /* 카카오 버튼 전용 색상 */
+        .btn-kakao {
+            background-color: #FAE100;
+            color: #3C1E1E;
+            font-weight: bold;
+        }
+
+        /* 결과 화면 */
+        #result-view { display: none; }
+        .quote-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .quote-table th, .quote-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        .quote-table th { background-color: #f8f8f8; width: 25%; }
+        
+        .total-price-area {
+            text-align: center;
+            font-size: 1.5em;
+            color: #d9534f;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 20px;
+            background: #fff5f5;
+            border-radius: 10px;
+        }
+
+        .notice-box {
+            font-size: 0.9em;
+            color: #666;
+            background: #f1f1f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        /* 관리자 모드 아이콘 */
+        #admin-icon {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            font-size: 20px;
+            opacity: 0.3;
+            cursor: pointer;
+        }
+        
+        /* 관리자 모달 */
+        #admin-modal {
+            display: none;
+            position: fixed;
+            top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            overflow-y: auto;
+        }
+        .admin-content {
+            background: white;
+            margin: 50px auto;
+            padding: 20px;
+            width: 95%;
+            max-width: 650px;
+            border-radius: 8px;
+        }
+        .admin-form-group {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background: #fdfdfd;
+        }
+        .admin-form-group input, .admin-form-group textarea {
+            width: 95%;
+            margin-bottom: 5px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .close-btn { float: right; cursor: pointer; font-size: 1.5em; }
+        
+        .admin-btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-edit {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 3px 8px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+        .btn-del {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 3px 8px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+        
+        /* 상품 동적 추가 UI */
+        .product-row {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 5px;
+            align-items: center;
+        }
+        .product-row input[type="text"] { flex: 2; }
+        .product-row input[type="number"] { flex: 1; }
+        .btn-remove-prod {
+            background: #ff4444; color: white; border: none; 
+            width: 25px; height: 25px; border-radius: 50%; cursor: pointer;
+        }
+        .btn-add-prod {
+            background: #4CAF50; color: white; border: none;
+            padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>하프웨드 결혼준비 견적서</h1>
+
+    <!-- 견적 선택 화면 -->
+    <div id="selection-view">
+        
+        <!-- 1. 스튜디오 -->
+        <div class="category-section" id="sec-studio">
+            <div class="category-title">스튜디오</div>
+            <div class="selection-display" onclick="toggleVendorList('studio')">업체 선택하기 (클릭)</div>
+            <div class="vendor-list-area" id="list-studio"></div>
+            <select class="option-select" id="opt-studio">
+                <option value="">상품을 선택하세요</option>
+            </select>
+        </div>
+
+        <!-- 2. 드레스 -->
+        <div class="category-section" id="sec-dress">
+            <div class="category-title">드레스</div>
+            <div class="selection-display" onclick="toggleVendorList('dress')">업체 선택하기 (클릭)</div>
+            <div class="vendor-list-area" id="list-dress"></div>
+            <select class="option-select" id="opt-dress">
+                <option value="">상품을 선택하세요</option>
+            </select>
+        </div>
+
+        <!-- 3. 메이크업 -->
+        <div class="category-section" id="sec-makeup">
+            <div class="category-title">메이크업</div>
+            <div class="selection-display" onclick="toggleVendorList('makeup')">업체 선택하기 (클릭)</div>
+            <div class="vendor-list-area" id="list-makeup"></div>
+            <select class="option-select" id="opt-makeup">
+                <option value="">상품을 선택하세요</option>
+            </select>
+        </div>
+
+        <!-- 4. 본식사진 -->
+        <div class="category-section" id="sec-snap">
+            <div class="category-title">본식사진</div>
+            <div class="selection-display" onclick="toggleVendorList('snap')">업체 선택하기 (클릭)</div>
+            <div class="vendor-list-area" id="list-snap"></div>
+            <select class="option-select" id="opt-snap">
+                <option value="">상품을 선택하세요</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <input type="text" id="naver-id" placeholder="네이버 아이디를 입력해주세요">
+        </div>
+
+        <button class="btn" onclick="calculateQuote()">견적 확인하기</button>
+    </div>
+
+    <!-- 견적 결과 화면 -->
+    <div id="result-view">
+        <h2>견적 결과</h2>
+        <p style="text-align:right; font-size:0.9em; color:#888;">네이버ID: <span id="res-naver-id"></span></p>
+        
+        <table class="quote-table">
+            <tbody id="quote-result-body">
+                <!-- 자바스크립트로 채워짐 -->
+            </tbody>
+        </table>
+
+        <div class="total-price-area">
+            합계: <span id="total-amount">0</span>원
+        </div>
+
+        <div class="notice-box">
+            <strong>안내 드립니다.</strong><br><br>
+            위 견적 불포함 사항: 드레스투어 진행 희망 시 피팅비(업체당 5.5만~22만원. 업체별 상이), 헬퍼비(25만원~. 업체,시간,장소,의상수별 상이), 메이크업 스타트 시간대별 추가비용(5.5만원~), 부케(14만원~)<br>
+            서울 외 지역 촬영 및 본식진행 시 헬퍼 및 본식사진 출장비가 추가로 발생할 수 있습니다. (업체, 지역별 상이)<br>
+            업체의 프로모션, 가격정책 변동에 따라 금액은 변동될 수 있습니다.
+        </div>
+
+        <!-- 버튼 영역 -->
+        <a href="https://center-pf.kakao.com/_lktxbn/chats" target="_blank" class="btn btn-kakao">
+            카카오톡 상담 연결
+        </a>
+        <button class="btn" style="background:#ccc;" onclick="location.reload()">
+            다시 견적내기
+        </button>
+    </div>
+</div>
+
+<!-- 관리자 모드 진입 아이콘 -->
+<div id="admin-icon" onclick="enterAdminMode()">🔒</div>
+
+<!-- 관리자 모달 -->
+<div id="admin-modal">
+    <div class="admin-content">
+        <span class="close-btn" onclick="closeAdminMode()">&times;</span>
+        <h2>관리자 모드</h2>
+        <p>업체 관리 및 상품 설정</p>
+        
+        <div style="margin-bottom: 15px;">
+            <label>카테고리 선택:</label>
+            <select id="admin-category-select" onchange="resetAdminForm()">
+                <option value="studio">스튜디오</option>
+                <option value="dress">드레스</option>
+                <option value="makeup">메이크업</option>
+                <option value="snap">본식사진</option>
+            </select>
+        </div>
+
+        <!-- 입력/수정 폼 -->
+        <div class="admin-form-group">
+            <h4>정보 입력</h4>
+            <input type="text" id="new-vendor-name" placeholder="업체 이름 (예: XX 스튜디오)">
+            <textarea id="new-vendor-desc" placeholder="구성 설명 (예: 20P 앨범, 원본포함 등)" rows="2"></textarea>
+            
+            <hr style="margin: 15px 0; border:0; border-top:1px dashed #ccc;">
+            
+            <h5>상품 및 가격 설정</h5>
+            <div id="product-list-container">
+                <!-- 동적 상품 row -->
+            </div>
+            <button type="button" class="btn-add-prod" onclick="addProductRow()">+ 상품 추가</button>
+        </div>
+
+        <div class="admin-btn-group">
+            <button class="btn" id="btn-save-vendor" onclick="saveVendor()">업체 저장/추가</button>
+            <button class="btn" id="btn-cancel-edit" onclick="cancelEdit()" style="background:#999; display:none;">수정 취소</button>
+        </div>
+
+        <hr>
+        <h3>등록된 업체 목록</h3>
+        <ul id="admin-vendor-list" style="padding-left:20px;"></ul>
+    </div>
+</div>
+
+<script>
+/* --- JavaScript 로직 --- */
+
+// 1. 기본 설정
+const categories = ['studio', 'dress', 'makeup', 'snap'];
+const categoryNames = {
+    studio: '스튜디오',
+    dress: '드레스',
+    makeup: '메이크업',
+    snap: '본식사진'
+};
+
+// 데이터 구조 (v2)
+let vendorData = JSON.parse(localStorage.getItem('halfwed_data_v2')) || {
+    studio: [
+        {
+            id: 1, name: "샘플 스튜디오", desc: "깔끔한 인물 중심", 
+            products: [
+                {name: "단품", price: 2000000},
+                {name: "토탈", price: 1500000}
+            ]
+        }
+    ],
+    dress: [
+        {
+            id: 2, name: "샘플 드레스", desc: "화려한 비즈 맛집",
+            products: [
+                {name: "촬영+본식", price: 1000000},
+                {name: "촬영만", price: 500000},
+                {name: "본식만", price: 800000}
+            ]
+        }
+    ],
+    makeup: [
+        {
+            id: 3, name: "샘플 메이크업", desc: "과즙 메이크업 전문",
+            products: [
+                {name: "촬영+본식(실장2회)", price: 1000000},
+                {name: "본식(실장1회)", price: 500000}
+            ]
+        }
+    ],
+    snap: [
+        {
+            id: 4, name: "샘플 스냅", desc: "따뜻한 색감",
+            products: [
+                {name: "본식스냅", price: 1000000},
+                {name: "본식사진", price: 1800000}
+            ]
+        }
+    ]
+};
+
+let currentEditIndex = -1;
+let userSelections = { studio: null, dress: null, makeup: null, snap: null };
+
+window.onload = function() {
+    if(!localStorage.getItem('halfwed_data_v2')) {
+        localStorage.setItem('halfwed_data_v2', JSON.stringify(vendorData));
+    }
+};
+
+// 2. 사용자 화면 기능
+
+function toggleVendorList(cat) {
+    const listArea = document.getElementById(`list-${cat}`);
+    const isVisible = listArea.style.display === 'block';
+    document.querySelectorAll('.vendor-list-area').forEach(el => el.style.display = 'none');
+    if (!isVisible) {
+        renderVendorList(cat);
+        listArea.style.display = 'block';
+    }
+}
+
+function renderVendorList(cat) {
+    const listArea = document.getElementById(`list-${cat}`);
+    listArea.innerHTML = '';
+    const vendors = vendorData[cat];
+    if(vendors.length === 0) {
+        listArea.innerHTML = '<div style="padding:10px;">등록된 업체가 없습니다.</div>';
+        return;
+    }
+    vendors.forEach((v, idx) => {
+        const div = document.createElement('div');
+        div.className = 'vendor-item';
+        div.innerText = v.name;
+        div.onclick = () => selectVendor(cat, idx, v.name);
+        listArea.appendChild(div);
+    });
+}
+
+function selectVendor(cat, idx, name) {
+    const display = document.querySelector(`#sec-${cat} .selection-display`);
+    display.innerText = `[선택됨] ${name}`;
+    display.style.background = '#ffeff1';
+    document.getElementById(`list-${cat}`).style.display = 'none';
+
+    const selectEl = document.getElementById(`opt-${cat}`);
+    selectEl.style.display = 'block';
+    selectEl.innerHTML = '<option value="">상품을 선택하세요</option>';
+    
+    const vendor = vendorData[cat][idx];
+    if(vendor && vendor.products) {
+        vendor.products.forEach((prod, pIdx) => {
+            const option = document.createElement('option');
+            option.value = pIdx;
+            option.innerText = prod.name;
+            selectEl.appendChild(option);
+        });
+    }
+
+    userSelections[cat] = { vendorIndex: idx, optionIndex: -1, name: name };
+    selectEl.onchange = (e) => {
+        userSelections[cat].optionIndex = parseInt(e.target.value);
+    };
+}
+
+function calculateQuote() {
+    const naverId = document.getElementById('naver-id').value.trim();
+    if (!naverId) {
+        alert("네이버 아이디를 입력해주세요.");
+        return;
+    }
+
+    let totalCost = 0;
+    let selectedCount = 0;
+    let html = '';
+
+    for (const cat of categories) {
+        const sel = userSelections[cat];
+        if (sel && sel.optionIndex !== -1 && !isNaN(sel.optionIndex)) {
+            
+            const vendor = vendorData[cat][sel.vendorIndex];
+            if(!vendor) continue;
+            
+            const product = vendor.products[sel.optionIndex];
+            
+            selectedCount++;
+            totalCost += parseInt(product.price);
+
+            html += `
+                <tr>
+                    <th>[${categoryNames[cat]}]</th>
+                    <td>
+                        <strong>${vendor.name}</strong><br>
+                        <span style="color:#666; font-size:0.9em;">[상품] ${product.name}</span><br>
+                        <span style="color:#888; font-size:0.85em;">[구성] ${vendor.desc}</span>
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    if (selectedCount < 2) {
+        alert("견적은 최소 2개 이상의 업체를 선택해야 가능합니다.");
+        return;
+    }
+
+    // 가격 정책: 선택한 업체 개수만큼 x 10만원 추가
+    let addPrice = 100000 * selectedCount;
+    let finalCost = totalCost + addPrice;
+
+    document.getElementById('selection-view').style.display = 'none';
+    document.getElementById('result-view').style.display = 'block';
+    document.getElementById('res-naver-id').innerText = naverId;
+    document.getElementById('quote-result-body').innerHTML = html;
+    document.getElementById('total-amount').innerText = finalCost.toLocaleString();
+    window.scrollTo(0, 0);
+}
+
+// 3. 관리자 모드 기능
+
+function enterAdminMode() {
+    const pwd = prompt("관리자 비밀번호를 입력하세요:");
+    if (pwd === "wjdrhkr1004#") {
+        document.getElementById('admin-modal').style.display = 'block';
+        resetAdminForm();
+    } else if(pwd !== null) {
+        alert("비밀번호가 틀렸습니다.");
+    }
+}
+
+function closeAdminMode() {
+    document.getElementById('admin-modal').style.display = 'none';
+    location.reload(); 
+}
+
+function resetAdminForm() {
+    cancelEdit();
+    renderAdminList();
+    document.getElementById('product-list-container').innerHTML = '';
+    addProductRow();
+}
+
+function addProductRow(name = '', price = '') {
+    const container = document.getElementById('product-list-container');
+    const div = document.createElement('div');
+    div.className = 'product-row';
+    div.innerHTML = `
+        <input type="text" class="prod-name" placeholder="상품명" value="${name}">
+        <input type="number" class="prod-price" placeholder="가격" value="${price}">
+        <button type="button" class="btn-remove-prod" onclick="this.parentElement.remove()">-</button>
+    `;
+    container.appendChild(div);
+}
+
+function renderAdminList() {
+    const cat = document.getElementById('admin-category-select').value;
+    const listArea = document.getElementById('admin-vendor-list');
+    listArea.innerHTML = '';
+
+    vendorData[cat].forEach((v, idx) => {
+        const li = document.createElement('li');
+        li.style.marginBottom = '15px';
+        
+        let prodText = v.products.map(p => `${p.name}(${p.price.toLocaleString()}원)`).join(', ');
+
+        li.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong>${v.name}</strong>
+                <div>
+                    <button class="btn-edit" onclick="editVendor('${cat}', ${idx})">수정</button>
+                    <button class="btn-del" onclick="deleteVendor('${cat}', ${idx})">삭제</button>
+                </div>
+            </div>
+            <div style="font-size:0.85em; color:#555; margin-top:5px;">
+                <strong>구성:</strong> ${v.desc} <br>
+                <strong>상품:</strong> ${prodText}
+            </div>
+        `;
+        listArea.appendChild(li);
+    });
+}
+
+function editVendor(cat, idx) {
+    currentEditIndex = idx;
+    const v = vendorData[cat][idx];
+    
+    document.getElementById('new-vendor-name').value = v.name;
+    document.getElementById('new-vendor-desc').value = v.desc;
+    
+    const container = document.getElementById('product-list-container');
+    container.innerHTML = '';
+    if (v.products && v.products.length > 0) {
+        v.products.forEach(p => addProductRow(p.name, p.price));
+    } else {
+        addProductRow();
+    }
+
+    document.getElementById('btn-save-vendor').innerText = "수정 완료";
+    document.getElementById('btn-cancel-edit').style.display = "inline-block";
+    document.querySelector('.admin-content').scrollTop = 0;
+}
+
+function cancelEdit() {
+    currentEditIndex = -1;
+    document.getElementById('btn-save-vendor').innerText = "업체 저장/추가";
+    document.getElementById('btn-cancel-edit').style.display = "none";
+    
+    document.getElementById('new-vendor-name').value = '';
+    document.getElementById('new-vendor-desc').value = '';
+    document.getElementById('product-list-container').innerHTML = '';
+    addProductRow();
+}
+
+function saveVendor() {
+    const cat = document.getElementById('admin-category-select').value;
+    const name = document.getElementById('new-vendor-name').value;
+    const desc = document.getElementById('new-vendor-desc').value;
+    
+    if (!name) { alert("업체 이름을 입력하세요"); return; }
+
+    const prodRows = document.querySelectorAll('.product-row');
+    let products = [];
+    let valid = true;
+
+    prodRows.forEach(row => {
+        const pName = row.querySelector('.prod-name').value.trim();
+        const pPrice = row.querySelector('.prod-price').value;
+
+        if (pName && pPrice) {
+            products.push({ name: pName, price: parseInt(pPrice) });
+        } else if (pName || pPrice) {
+            valid = false;
+        }
+    });
+
+    if (!valid || products.length === 0) {
+        alert("적어도 하나의 완전한 상품 정보(이름+가격)를 입력해야 합니다.");
+        return;
+    }
+
+    const newVendorObj = {
+        id: currentEditIndex === -1 ? Date.now() : vendorData[cat][currentEditIndex].id,
+        name: name,
+        desc: desc,
+        products: products
+    };
+
+    if (currentEditIndex === -1) {
+        vendorData[cat].push(newVendorObj);
+        alert("추가되었습니다.");
+    } else {
+        vendorData[cat][currentEditIndex] = newVendorObj;
+        alert("수정되었습니다.");
+    }
+
+    localStorage.setItem('halfwed_data_v2', JSON.stringify(vendorData));
+    resetAdminForm();
+}
+
+function deleteVendor(cat, idx) {
+    if(confirm("정말 삭제하시겠습니까?")) {
+        vendorData[cat].splice(idx, 1);
+        localStorage.setItem('halfwed_data_v2', JSON.stringify(vendorData));
+        resetAdminForm();
+    }
+}
+</script>
+
+</body>
+</html>
